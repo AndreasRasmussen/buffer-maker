@@ -1,0 +1,12 @@
+body {
+    padding-top: 70px;
+    padding-bottom: 30px;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.remove-component {
+    color: red;
+}

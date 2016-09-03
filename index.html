@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Andreas' buffer maker</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Andreas' buffer maker</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Add new buffer component</h3>
+                </div>
+                <div class="panel-body">
+
+                    <div class="form-group">
+                        <label for="bufferInput">Choose a buffer component</label>
+                        <select id="bufferInput" v-model="component.type" class="form-control" required>
+                            <option value="" v-if="component.type===''">Pick a buffer component</option>
+                            <option v-for="(key,component) in components" v-bind:value="key">{{component.name}}</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-sm-8">
+                            <label for="concentrationInput">Concentration</label>
+                            <input type="number" v-model="component.amount" class="form-control" id="concentrationInput">
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label for="concentrationUnitInput">Unit</label>
+                            <select v-model="component.unit" class="form-control" id="concentrationUnitInput">
+                                <option value="" v-if="component.type===''">First pick a buffer component</option>
+                                <option value="" v-if="component.type !== '' && component.unit === ''">Pick a unit</option>
+                                <option v-if="components[component.type].type == 'solid'">nM</option>
+                                <option v-if="components[component.type].type == 'solid'">µM</option>
+                                <option v-if="components[component.type].type == 'solid'">mM</option>
+                                <option v-if="components[component.type].type == 'solid'">M</option>
+                                <option v-if="components[component.type].type == 'liquid'">%</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row" v-if="component.unit == '%'">
+                        <div class="form-group col-sm-8">
+                            <label for="startConcentrationInput">Stock concentration</label>
+                            <div class="input-group">
+                                <input type="number" id="startConcentrationInput" max="100" v-model="component.amountFrom" class="form-control" aria-describedby="percentage-addon">
+                                <span class="input-group-addon" id="percentage-addon">%</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="panel-footer" v-if="canAddComponent">
+                    <button type="button" class="btn btn-primary btn-block" @click="addComponent(component.type, component.amount, component.unit, component.amountFrom)">Add component</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Your buffer</h3>
+                </div>
+                <div class="panel-body">
+
+                    <div class="row">
+                        <div class="form-group col-sm-8">
+                            <label for="bufferVolumeInput">Volume</label>
+                            <input type="number" step="0.1" v-model="buffer.volume" class="form-control" id="bufferVolumeInput">
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label for="bufferVolumeUnitInput">Unit</label>
+                            <select v-model="buffer.unit" class="form-control" id="bufferVolumeUnitInput">
+                                <option>µL</option>
+                                <option>mL</option>
+                                <option>L</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table" v-if="buffer.components.length">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Concentration</th>
+                                    <th v-if="hasLiquidComponent">Start concentration</th>
+                                    <th>Amount to weight</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="component in buffer.components">
+                                    <th>{{ components[component.type].name }}</th>
+                                    <th>{{ component.amount }} {{ component.unit }}</th>
+                                    <th v-if="hasLiquidComponent"><template v-if="component.amountFrom">{{ component.amountFrom }} {{ component.unit }}</template></th>
+                                    <th class="success">{{ getAmountToWeigh(component).amount.toPrecision(4) }} {{ getAmountToWeigh(component).unit }}</th>
+                                    <th><a @click="editComponent(component)" class="pointer">Edit</a></th>
+                                    <th><a @click="removeComponent(component)" class="remove-component pointer">&times;</a></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <pre>{{ $data | json }}</pre>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: 'body',
+        data: {
+            components: [
+                {
+                    name: 'HEPES',
+                    weight: 238.3012,
+                    type: 'solid'
+                },
+                {
+                    name: 'NaCl',
+                    weight: 58.44,
+                    type: 'solid'
+                },
+                {
+                    name: 'Glycerol',
+                    type: 'liquid'
+                }
+            ],
+            component: {
+                type: '',
+                amount: 1,
+                unit: '',
+                amountFrom: 100
+            },
+            buffer: {
+                volume: 1,
+                unit: 'L',
+                components: []
+            }
+        },
+
+        computed: {
+            canAddComponent: function() {
+                return this.component.type !== '' && this.component.amount != 0 && this.component.unit !== '';
+            },
+
+            hasLiquidComponent: function() {
+                return this.buffer.components.filter(function(component) {
+                    return typeof component.amountFrom !== 'undefined';
+                }).length;
+            }
+        },
+
+        methods: {
+            addComponent: function(type, amount, unit, amountFrom) {
+                var component = {
+                    type: type,
+                    amount: amount,
+                    unit: unit
+                };
+                if(unit === '%') {
+                    component.amountFrom = amountFrom;
+                }
+                this.buffer.components.push(component);
+                this.resetComponentForm();
+            },
+
+            resetComponentForm: function() {
+                this.component.type = '';
+                this.component.amount = '';
+                this.component.unit = '';
+            },
+
+            getAmountToWeigh: function(component) {
+                var unit = component.unit;
+                var volumeFactor = this.getVolumeFactorFromUnit(this.buffer.unit);
+                var literVolume = this.buffer.volume * volumeFactor;
+
+                if(unit === '%') {
+                    var volumeToGet = literVolume * component.amount / component.amountFrom;
+                    var volumeUnit = 'L';
+                    if(volumeToGet < 1) {
+                        volumeToGet = volumeToGet * 1000;
+                        volumeUnit = 'mL';
+                    }
+                    return {
+                        amount: volumeToGet,
+                        unit: volumeUnit
+                    }
+                } else {
+                    var molarFactor = this.getMolarFactorFromUnit(unit);
+                    var concentrationToGet = molarFactor * component.amount;
+                    var molesToGet = concentrationToGet * literVolume;
+                    var massToGet = molesToGet * this.components[component.type].weight;
+                    return {
+                        amount: massToGet,
+                        unit: 'g'
+                    }
+                }
+            },
+
+            editComponent: function(component) {
+                this.component.type = component.type;
+                this.component.amount = component.amount;
+                this.component.unit = component.unit;
+                this.component.amountFrom = component.amountFrom || 100;
+                this.removeComponent(component);
+            },
+
+            removeComponent: function(component) {
+                this.buffer.components.$remove(component);
+            },
+
+            getMolarFactorFromUnit: function(unit) {
+                switch(unit) {
+                    case 'nM':
+                        return 1/1000000000;
+                    case 'µM':
+                        return 1/1000000;
+                    case 'mM':
+                        return 1/1000;
+                    case 'M':
+                    default:
+                        return 1;
+                }
+            },
+
+            getVolumeFactorFromUnit: function(unit) {
+                switch(unit) {
+                    case 'µL':
+                        return 1/1000000;
+                    case 'mL':
+                        return 1/1000;
+                    case 'L':
+                    default:
+                        return 1;
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>
