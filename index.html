@@ -144,22 +144,7 @@
     var vm = new Vue({
         el: 'body',
         data: {
-            components: [
-                {
-                    name: 'HEPES',
-                    weight: 238.3012,
-                    type: 'solid'
-                },
-                {
-                    name: 'NaCl',
-                    weight: 58.44,
-                    type: 'solid'
-                },
-                {
-                    name: 'Glycerol',
-                    type: 'liquid'
-                }
-            ],
+            components: [],
             component: {
                 type: '',
                 amount: 1,
@@ -171,6 +156,13 @@
                 unit: 'L',
                 components: []
             }
+        },
+
+        created: function() {
+            var self = this;
+            $.getJSON( "components.json", function(data) {
+                self.$set('components', data);
+            });
         },
 
         computed: {

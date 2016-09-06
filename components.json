@@ -1,0 +1,16 @@
+[
+  {
+    "name": "HEPES",
+    "weight": 238.3012,
+    "type": "solid"
+  },
+  {
+    "name": "NaCl",
+    "weight": 58.44,
+    "type": "solid"
+  },
+  {
+    "name": "Glycerol",
+    "type": "liquid"
+  }
+]
