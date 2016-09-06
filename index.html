@@ -92,7 +92,11 @@
                 <div class="panel-body">
 
                     <div class="row">
-                        <div class="form-group col-sm-8">
+                        <div class="form-group col-sm-4">
+                            <label for="bufferpHInput">pH</label>
+                            <input type="number" step="0.1" v-model="buffer.pH" class="form-control" id="bufferpHInput">
+                        </div>
+                        <div class="form-group col-sm-4">
                             <label for="bufferVolumeInput">Volume</label>
                             <input type="number" step="0.1" v-model="buffer.volume" class="form-control" id="bufferVolumeInput">
                         </div>
@@ -154,6 +158,7 @@
             buffer: {
                 volume: 1,
                 unit: 'L',
+                pH: '',
                 components: []
             }
         },
