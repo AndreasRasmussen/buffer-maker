@@ -45,7 +45,7 @@
                         <label for="bufferInput">Choose a buffer component</label>
                         <select id="bufferInput" v-model="component.type" class="form-control" required>
                             <option value="" v-if="component.type===''">Pick a buffer component</option>
-                            <option v-for="(key,component) in components" v-bind:value="key">{{component.name}}</option>
+                            <option v-for="(key,component) in components | orderBy 'name'" v-bind:value="key">{{component.name}}</option>
                         </select>
                     </div>
 

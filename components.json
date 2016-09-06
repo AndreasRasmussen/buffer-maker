@@ -1,12 +1,32 @@
 [
   {
+    "name": "Calcium chloride dihydrate",
+    "weight": 147.02,
+    "type": "solid"
+  },
+  {
+    "name": "Guanidine hydrochloride",
+    "weight": 95.53,
+    "type": "solid"
+  },
+  {
     "name": "HEPES",
     "weight": 238.3012,
     "type": "solid"
   },
   {
+    "name": "Imidazole",
+    "weight": 68.077,
+    "type": "solid"
+  },
+  {
     "name": "NaCl",
     "weight": 58.44,
+    "type": "solid"
+  },
+  {
+    "name": "Tris",
+    "weight": 121.14,
     "type": "solid"
   },
   {
